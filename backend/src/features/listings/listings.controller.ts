@@ -1,24 +1,16 @@
 import { Request, Response } from "express";
 import { ListingsService } from "./listings.service";
+import { db } from "../../config/database";
 
 const listingsService = new ListingsService();
 
 export const getAllListings = (req: Request, res: Response) => {
-  try {
-    const listings = listingsService.getAllListings();
+  const page = Math.max(Number(req.query.page) || 1, 1);
+  const limit = Math.max(Number(req.query.limit) || 8, 1);
 
-    res.status(200).json({
-      success: true,
-      data: listings,
-    });
-  } catch (error) {
-    console.error("Error fetching listings:", error);
+  const result = listingsService.getAllListings(page, limit);
 
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch listings",
-    });
-  }
+  res.json(result);
 };
 
 export const getListingById = (req: Request, res: Response) => {
