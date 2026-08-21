@@ -1,7 +1,10 @@
-import { useState } from 'react'
-import type { Category, Condition } from '../../types/listing.types'
-import { CONDITIONS } from '../../types/listing.types'
-import { validateListingForm, type ListingFormErrors } from '../utils/validateListingForm'
+import {useState} from 'react'
+import type {Category, Condition} from '../../types/listing.types'
+import {CONDITIONS} from '../../types/listing.types'
+import {
+  validateListingForm,
+  type ListingFormErrors,
+} from '../utils/validateListingForm'
 import NumericInput from '../../../components/form/NumericInput'
 import CategorySelect from './CategorySelect'
 import ImageUploadField from './ImageUploadField'
@@ -14,7 +17,11 @@ interface ListingFormProps {
   error?: string | null
 }
 
-const ListingForm = ({ onSubmit, loading = false, error = null }: ListingFormProps) => {
+const ListingForm = ({
+  onSubmit,
+  loading = false,
+  error = null,
+}: ListingFormProps) => {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [condition, setCondition] = useState<Condition | ''>('')
@@ -26,7 +33,7 @@ const ListingForm = ({ onSubmit, loading = false, error = null }: ListingFormPro
   const clearFieldError = (field: keyof ListingFormErrors) => {
     setFieldErrors((prev) => {
       if (!prev[field]) return prev
-      const next = { ...prev }
+      const next = {...prev}
       delete next[field]
       return next
     })
@@ -93,12 +100,10 @@ const ListingForm = ({ onSubmit, loading = false, error = null }: ListingFormPro
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="space-y-6">
+    <form onSubmit={handleSubmit} noValidate className="space-y-3">
       {error && <ErrorState message={error} />}
-
-      {/* Title */}
       <div>
-        <label htmlFor="title" className="mb-2 block font-medium">
+        <label htmlFor="title" className="mb-1.5 block text-sm font-medium text-gray-700">
           Title
         </label>
         <input
@@ -114,27 +119,8 @@ const ListingForm = ({ onSubmit, loading = false, error = null }: ListingFormPro
         <FieldError message={fieldErrors.title} />
       </div>
 
-      {/* Description */}
       <div>
-        <label htmlFor="description" className="mb-2 block font-medium">
-          Description (Specifications)
-        </label>
-        <textarea
-          id="description"
-          value={description}
-          onChange={(e) => handleDescriptionChange(e.target.value)}
-          placeholder="Describe your item"
-          rows={5}
-          className={`w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 ${
-            fieldErrors.description ? 'border-red-400' : 'border-gray-300'
-          }`}
-        />
-        <FieldError message={fieldErrors.description} />
-      </div>
-
-      {/* Condition */}
-      <div>
-        <label htmlFor="condition" className="mb-2 block font-medium">
+        <label htmlFor="condition" className="mb-1.5 block text-sm font-medium text-gray-700">
           Condition
         </label>
         <select
@@ -155,7 +141,11 @@ const ListingForm = ({ onSubmit, loading = false, error = null }: ListingFormPro
         <FieldError message={fieldErrors.condition} />
       </div>
 
-      {/* Price */}
+      <div>
+        <CategorySelect value={category} onChange={handleCategoryChange} />
+        <FieldError message={fieldErrors.category} />
+      </div>
+
       <div>
         <NumericInput
           label="Price"
@@ -166,16 +156,28 @@ const ListingForm = ({ onSubmit, loading = false, error = null }: ListingFormPro
         <FieldError message={fieldErrors.price} />
       </div>
 
-      {/* Category */}
       <div>
-        <CategorySelect value={category} onChange={handleCategoryChange} />
-        <FieldError message={fieldErrors.category} />
+        <label htmlFor="description" className="mb-1.5 block text-sm font-medium text-gray-700">
+          Description (Specifications)
+        </label>
+        <textarea
+          id="description"
+          value={description}
+          onChange={(e) => handleDescriptionChange(e.target.value)}
+          placeholder="Describe your item"
+          rows={5}
+          className={`w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 ${
+            fieldErrors.description ? 'border-red-400' : 'border-gray-300'
+          }`}
+        />
+        <FieldError message={fieldErrors.description} />
       </div>
 
-      {/* Image */}
-      <ImageUploadField onChange={handleImageChange} error={fieldErrors.image} />
+      <ImageUploadField
+        onChange={handleImageChange}
+        error={fieldErrors.image}
+      />
 
-      {/* Submit */}
       <button
         type="submit"
         disabled={loading}

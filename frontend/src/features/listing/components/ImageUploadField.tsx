@@ -27,7 +27,7 @@ export default function ImageUploadField({ onChange, error }: ImageUploadFieldPr
 
   return (
     <div>
-      <label className="mb-2 block font-medium">Image</label>
+      <label className="mb-1.5 block text-sm font-medium text-gray-700">Image</label>
 
       {!preview ? (
         <label

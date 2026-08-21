@@ -11,10 +11,6 @@ const ListingSort = ({
 }: ListingSortProps) => {
   return (
     <div className="flex items-center justify-between">
-      <h1 className="text-2xl font-bold">
-        Listings
-      </h1>
-
       <select
         value={value}
         onChange={(e) =>

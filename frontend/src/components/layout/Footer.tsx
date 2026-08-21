@@ -1,9 +1,9 @@
 export default function Footer() {
   return (
-    <footer className="border-t border-border bg-surface">
+    <footer className="border-t border-border bg-surface bg-black text-white">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 text-center">
         <div className="text-center">
-          <h2 className="text-lg font-bold text-primary">
+          <h2 className="text-lg font-bold">
             Marketplace
           </h2>
 
@@ -12,7 +12,7 @@ export default function Footer() {
           </p>
         </div>
 
-        <div className="mt-8 border-t border-border pt-6 text-center text-sm text-muted">
+        <div className="mt-8 border-t border-border pt-6 text-center text-sm text-mute">
           © {new Date().getFullYear()} Marketplace. All rights reserved.
         </div>
       </div>

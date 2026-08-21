@@ -17,7 +17,7 @@ export default function NumericInput({
 }: NumericInputProps) {
   return (
     <div>
-      <label className="mb-1 block text-sm font-medium">{label}</label>
+      <label className="mb-1.5 block text-sm font-medium text-gray-700">{label}</label>
       <input
         type="number"
         min={min}
@@ -25,7 +25,7 @@ export default function NumericInput({
         value={value}
         onChange={(e) => onChange(e.target.value === '' ? '' : Number(e.target.value))}
         placeholder={placeholder}
-        className="w-full rounded-lg border border-gray-300 px-3 py-2"
+        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
       />
     </div>
   )
