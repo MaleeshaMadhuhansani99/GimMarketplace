@@ -125,6 +125,14 @@ PORT=3000
 cd backend
 npm run dev
 ```
+After starting the server db folder will be created under backend folder with the marketplace.db file
+
+**Seeding:**
+
+```bash
+cd backend
+npm run seed
+```
 
 **Frontend:**
 
