@@ -20,7 +20,7 @@ export default function CreateListing(){
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="mb-8 text-3xl font-bold">Create Listing</h1>
+      <h1 className="mb-8 text-3xl font-bold">Add your product details</h1>
 
       <ListingForm onSubmit={handleCreateListing} loading={loading} error={error} />
     </div>

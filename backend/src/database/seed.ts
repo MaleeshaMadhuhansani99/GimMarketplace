@@ -8,7 +8,7 @@ const listings = [
     price: 145000,
     condition: "Used",
     description:
-      "iPhone 13 with 128GB storage. Battery health is 89%. Fully functional and in good condition.",
+      "iPhone 13 with 128GB storage. Battery health is 89%. Fully functional and in New condition.",
     image_url: "/images/iphone-13.jpg",
   },
   {
@@ -24,7 +24,7 @@ const listings = [
     title: "Google Pixel 8",
     category: "Mobile Phones",
     price: 135000,
-    condition: "Good",
+    condition: "New",
     description:
       "Google Pixel 8 with 128GB storage and excellent camera quality.",
     image_url: "/images/google-pixel-8.jpg",
@@ -33,7 +33,7 @@ const listings = [
     title: "OnePlus 12",
     category: "Mobile Phones",
     price: 175000,
-    condition: "Good",
+    condition: "New",
     description:
       "OnePlus 12 with 256GB storage and 12GB RAM. Fast performance and excellent display.",
     image_url: "/images/oneplus-12.jpg",
@@ -53,7 +53,7 @@ const listings = [
     title: "Dell XPS 13",
     category: "Laptops",
     price: 265000,
-    condition: "Good",
+    condition: "New",
     description:
       "Dell XPS 13 with Intel Core i7, 16GB RAM and 512GB SSD.",
     image_url: "/images/dell-xps-13.jpg",
@@ -71,7 +71,7 @@ const listings = [
     title: "ASUS ROG Gaming Laptop",
     category: "Laptops",
     price: 365000,
-    condition: "Good",
+    condition: "New",
     description:
       "ASUS ROG gaming laptop with dedicated graphics, 16GB RAM and 1TB SSD.",
     image_url: "/images/asus-rog.jpg",
@@ -82,7 +82,7 @@ const listings = [
     title: "Leather Office Chair",
     category: "Furniture",
     price: 45000,
-    condition: "Good",
+    condition: "New",
     description:
       "Comfortable leather office chair with adjustable height and armrests.",
     image_url: "/images/office-chair.jpg",
@@ -91,7 +91,7 @@ const listings = [
     title: "Wooden Study Desk",
     category: "Furniture",
     price: 38000,
-    condition: "Good",
+    condition: "New",
     description:
       "Solid wooden study desk with two drawers. Suitable for a home office or study room.",
     image_url: "/images/study-desk.jpg",
@@ -120,7 +120,7 @@ const listings = [
     title: "Electric Rice Cooker",
     category: "Kitchen items",
     price: 18000,
-    condition: "Good",
+    condition: "New",
     description:
       "Electric rice cooker with automatic cooking and warming functions.",
     image_url: "/images/rice-cooker.jpg",
@@ -140,7 +140,7 @@ const listings = [
     title: "Nike Air Max Running Shoes",
     category: "Sports",
     price: 24000,
-    condition: "Good",
+    condition: "New",
     description:
       "Nike Air Max running shoes, size 9 US. Comfortable for running and everyday use.",
     image_url: "/images/nike-air-max.jpg",
@@ -158,7 +158,7 @@ const listings = [
     title: "Adjustable Dumbbell Set",
     category: "Sports",
     price: 32000,
-    condition: "Good",
+    condition: "New",
     description:
       "Adjustable dumbbell set suitable for home workouts and strength training.",
     image_url: "/images/dumbbell-set.jpg",
@@ -169,7 +169,7 @@ const listings = [
     title: "Clean Code",
     category: "Books",
     price: 6500,
-    condition: "Good",
+    condition: "New",
     description:
       "A well-maintained copy of Clean Code by Robert C. Martin.",
     image_url: "/images/clean-code.jpg",
@@ -187,9 +187,9 @@ const listings = [
     title: "Atomic Habits",
     category: "Books",
     price: 5500,
-    condition: "Good",
+    condition: "New",
     description:
-      "Popular personal development book in good condition with minimal wear.",
+      "Popular personal development book in New condition with minimal wear.",
     image_url: "/images/atomic-habits.jpg",
   },
 
@@ -207,7 +207,7 @@ const listings = [
     title: "Xbox Series X",
     category: "Gaming",
     price: 155000,
-    condition: "Good",
+    condition: "New",
     description:
       "Xbox Series X console with one wireless controller. Fully functional.",
     image_url: "/images/xbox-series-x.jpg",
@@ -216,7 +216,7 @@ const listings = [
     title: "Nintendo Switch OLED",
     category: "Gaming",
     price: 105000,
-    condition: "Good",
+    condition: "New",
     description:
       "Nintendo Switch OLED with dock, Joy-Con controllers and original accessories.",
     image_url: "/images/nintendo-switch-oled.jpg",
@@ -236,16 +236,16 @@ const listings = [
     title: "Men's Denim Jacket",
     category: "Clothing",
     price: 8500,
-    condition: "Good",
+    condition: "New",
     description:
-      "Classic blue denim jacket in good condition. Medium size.",
+      "Classic blue denim jacket in New condition. Medium size.",
     image_url: "/images/denim-jacket.jpg",
   },
   {
     title: "Women's Winter Coat",
     category: "Clothing",
     price: 12000,
-    condition: "Good",
+    condition: "New",
     description:
       "Warm winter coat suitable for cold weather. Lightly used.",
     image_url: "/images/winter-coat.jpg",
@@ -265,9 +265,9 @@ const listings = [
     title: "Bluetooth Portable Speaker",
     category: "Other",
     price: 14000,
-    condition: "Good",
+    condition: "New",
     description:
-      "Portable Bluetooth speaker with good sound quality and long battery life.",
+      "Portable Bluetooth speaker with New sound quality and long battery life.",
     image_url: "/images/bluetooth-speaker.jpg",
   },
   {
@@ -283,7 +283,7 @@ const listings = [
     title: "Backpack",
     category: "Other",
     price: 9000,
-    condition: "Good",
+    condition: "New",
     description:
       "Durable everyday backpack with multiple compartments for books and laptops.",
     image_url: "/images/backpack.jpg",

@@ -17,7 +17,7 @@ export default function Navbar() {
               className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg bg-black px-4 py-2 text-white"
             >
               <FiPlus size={18} strokeWidth={3} />
-              Add Listing
+              Add Product
             </Link>
 
             <ListingSearchContainer />
