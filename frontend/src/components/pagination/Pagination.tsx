@@ -12,8 +12,6 @@ export default function Pagination({
   const hasPrevious = currentPage > 1
   const hasNext = currentPage < totalPages
 
-  console.log('Pagination component rendered with currentPage:', currentPage, 'totalPages:', totalPages)
-
   return (
     <div className="mt-8 flex items-center justify-center gap-4">
       <button

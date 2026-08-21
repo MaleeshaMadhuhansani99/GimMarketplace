@@ -67,7 +67,6 @@ const SimilarListings = ({
     currentListingId,
   ])
 
-  console.log(listings);
   if (loading) {
     return (
       <section className="mt-16 border-t pt-10">
