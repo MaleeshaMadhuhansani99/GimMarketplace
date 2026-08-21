@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import type {
   Category,
   Listing,
-} from '../../types/types'
+} from '../../types/listing.types'
 import { getAllListings } from '../listingsApi'
 import ListingCard from './ListingCard'
 

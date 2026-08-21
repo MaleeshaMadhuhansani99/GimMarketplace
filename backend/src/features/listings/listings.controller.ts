@@ -3,37 +3,21 @@ import fs from 'fs'
 import path from 'path'
 
 import { ListingsService } from './listings.service'
-import {
-  Category,
-  SortOption,
-} from './listings.types'
+import { Category, Condition, SortOption } from './listings.types'
+import { sendSuccess, sendError } from '../../utils/apiResponse'
 
-const listingsService =
-  new ListingsService()
+const listingsService = new ListingsService()
 
-// ==========================================
-// GET ALL LISTINGS
-// ==========================================
+const VALID_CONDITIONS: Condition[] = ['New', 'Used']
 
-export const getAllListings = (
-  req: Request,
-  res: Response,
-) => {
+//getAllListing
+export const getAllListings = (req: Request, res: Response) => {
   try {
-    const page = Math.max(
-      Number(req.query.page) || 1,
-      1,
-    )
-
-    const limit = Math.max(
-      Number(req.query.limit) || 8,
-      1,
-    )
+    const page = Math.max(Number(req.query.page) || 1, 1)
+    const limit = Math.max(Number(req.query.limit) || 8, 1)
 
     const search =
-      typeof req.query.search === 'string'
-        ? req.query.search
-        : ''
+      typeof req.query.search === 'string' ? req.query.search : ''
 
     const sort =
       typeof req.query.sort === 'string'
@@ -46,202 +30,106 @@ export const getAllListings = (
         : ''
 
     const minPrice =
-      req.query.minPrice !== undefined &&
-      req.query.minPrice !== ''
+      req.query.minPrice !== undefined && req.query.minPrice !== ''
         ? Number(req.query.minPrice)
         : ''
 
     const maxPrice =
-      req.query.maxPrice !== undefined &&
-      req.query.maxPrice !== ''
+      req.query.maxPrice !== undefined && req.query.maxPrice !== ''
         ? Number(req.query.maxPrice)
         : ''
 
-    const result =
-      listingsService.getAllListings(
-        page,
-        limit,
-        search,
-        sort,
-        category,
-        minPrice,
-        maxPrice,
-      )
-
-    res.status(200).json(result)
-  } catch (error) {
-    console.error(
-      'Error fetching listings:',
-      error,
+    const result = listingsService.getAllListings(
+      page,
+      limit,
+      search,
+      sort,
+      category,
+      minPrice,
+      maxPrice,
     )
 
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch listings',
-    })
+    return sendSuccess(res, 200, result)
+  } catch (error) {
+    console.error('Error fetching listings:', error)
+    return sendError(res, 500, 'Failed to fetch listings')
   }
 }
 
-// ==========================================
-// GET LISTING BY ID
-// ==========================================
-
-export const getListingById = (
-  req: Request,
-  res: Response,
-) => {
+//getListingById
+export const getListingById = (req: Request, res: Response) => {
   try {
     const id = Number(req.params.id)
 
     if (Number.isNaN(id)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid listing ID',
-      })
+      return sendError(res, 400, 'Invalid listing ID')
     }
 
-    const listing =
-      listingsService.getListingById(id)
+    const listing = listingsService.getListingById(id)
 
     if (!listing) {
-      return res.status(404).json({
-        success: false,
-        message: 'Listing not found',
-      })
+      return sendError(res, 404, 'Listing not found')
     }
 
-    return res.status(200).json({
-      success: true,
-      data: listing,
-    })
+    return sendSuccess(res, 200, { data: listing })
   } catch (error) {
-    console.error(
-      'Error fetching listing:',
-      error,
-    )
-
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to fetch listing',
-    })
+    console.error('Error fetching listing:', error)
+    return sendError(res, 500, 'Failed to fetch listing')
   }
 }
 
-// ==========================================
-// CREATE LISTING
-// ==========================================
-
-export const createListing = (
-  req: Request,
-  res: Response,
-) => {
+//createListing
+export const createListing = (req: Request, res: Response) => {
   try {
-    const {
-      title,
-      description,
-      condition,
-      price,
-      category,
-    } = req.body
-
+    const { title, description, condition, price, category } = req.body
     const image = req.file
 
-    // ----------------------------
-    // Validate required fields
-    // ----------------------------
+    if (!title || !description || !condition || !price || !category) {
+      if (image) fs.unlinkSync(image.path)
 
-    if (
-      !title ||
-      !description ||
-    !condition ||
-      !price ||
-      !category
-    ) {
-      // Remove uploaded file if validation fails
-      if (image) {
-        fs.unlinkSync(image.path)
-      }
-
-      return res.status(400).json({
-        success: false,
-        message:
-          'Title, description, price and category are required',
-      })
+      return sendError(
+        res,
+        400,
+        'Title, description, condition, price and category are required',
+      )
     }
-
-    // ----------------------------
-    // Validate image
-    // ----------------------------
 
     if (!image) {
-      return res.status(400).json({
-        success: false,
-        message: 'Image is required',
-      })
+      return sendError(res, 400, 'Image is required')
     }
 
-    // ----------------------------
-    // Validate price
-    // ----------------------------
+    if (!VALID_CONDITIONS.includes(condition)) {
+      fs.unlinkSync(image.path)
+      return sendError(res, 400, 'Invalid condition value')
+    }
 
     const numericPrice = Number(price)
 
-    if (
-      Number.isNaN(numericPrice) ||
-      numericPrice < 0
-    ) {
+    if (Number.isNaN(numericPrice) || numericPrice < 0) {
       fs.unlinkSync(image.path)
-
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid price',
-      })
+      return sendError(res, 400, 'Invalid price')
     }
 
-    // ----------------------------
-    // Create listing first
-    // ----------------------------
-
-    const listing =
-      listingsService.createListing(
-        title,
-        description,
-        condition,
-        numericPrice,
-        category as Category,
-        '',
-      )
+    const listing = listingsService.createListing(
+      title,
+      description,
+      condition as Condition,
+      numericPrice,
+      category as Category,
+      '',
+    )
 
     if (!listing) {
       fs.unlinkSync(image.path)
-
-      return res.status(500).json({
-        success: false,
-        message: 'Failed to create listing',
-      })
+      return sendError(res, 500, 'Failed to create listing')
     }
-
-    // ----------------------------
-    // Get generated listing ID
-    // ----------------------------
 
     const listingId = listing.id
 
-    // ----------------------------
-    // Create final image filename
-    // ----------------------------
-
-    const extension = path
-      .extname(image.originalname)
-      .toLowerCase()
-
-    const fileName =
-      `${listingId}${extension}`
-
-    // Temporary file created by Multer
+    const extension = path.extname(image.originalname).toLowerCase()
+    const fileName = `${listingId}${extension}`
     const tempPath = image.path
 
-    // Final path
     const finalPath = path.join(
       process.cwd(),
       'public',
@@ -249,67 +137,65 @@ export const createListing = (
       fileName,
     )
 
-    // ----------------------------
-    // Move image
-    // ----------------------------
+    fs.renameSync(tempPath, finalPath)
 
-    fs.renameSync(
-      tempPath,
-      finalPath,
-    )
+    const imageUrl = `/images/${fileName}`
+    listingsService.updateListingImage(listingId, imageUrl)
 
-    // ----------------------------
-    // Save image URL
-    // ----------------------------
+    const createdListing = listingsService.getListingById(listingId)
 
-    const imageUrl =
-      `/images/${fileName}`
-
-    listingsService.updateListingImage(
-      listingId,
-      imageUrl,
-    )
-
-    // ----------------------------
-    // Get final listing
-    // ----------------------------
-
-    const createdListing =
-      listingsService.getListingById(
-        listingId,
-      )
-
-    return res.status(201).json({
-      success: true,
-      data: createdListing,
-    })
+    return sendSuccess(res, 201, { data: createdListing })
   } catch (error) {
-    console.error(
-      'Error creating listing:',
-      error,
-    )
+    console.error('Error creating listing:', error)
 
-    // If Multer uploaded a file but
-    // something failed afterward,
-    // clean it up.
     if (req.file) {
       try {
-        if (
-          fs.existsSync(req.file.path)
-        ) {
+        if (fs.existsSync(req.file.path)) {
           fs.unlinkSync(req.file.path)
         }
       } catch (cleanupError) {
-        console.error(
-          'Error cleaning uploaded file:',
-          cleanupError,
-        )
+        console.error('Error cleaning uploaded file:', cleanupError)
       }
     }
 
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to create listing',
-    })
+    return sendError(res, 500, 'Failed to create listing')
+  }
+}
+
+//deleteListing
+export const deleteListing = (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id)
+
+    if (Number.isNaN(id)) {
+      return sendError(res, 400, 'Invalid listing ID')
+    }
+
+    const deletedListing = listingsService.deleteListing(id)
+
+    if (!deletedListing) {
+      return sendError(res, 404, 'Listing not found')
+    }
+
+    if (deletedListing.image_url) {
+      const imagePath = path.join(
+        process.cwd(),
+        'public',
+        deletedListing.image_url,
+      )
+
+      try {
+        if (fs.existsSync(imagePath)) {
+          fs.unlinkSync(imagePath)
+        }
+      } catch (cleanupError) {
+        console.error('Error removing listing image:', cleanupError)
+      }
+    }
+
+    return sendSuccess(res, 200, undefined, 'Listing deleted successfully')
+  } catch (error) {
+    console.error('Error deleting listing:', error)
+    return sendError(res, 500, 'Failed to delete listing')
   }
 }

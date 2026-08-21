@@ -1,119 +1,89 @@
-import {useEffect, useState} from 'react'
-import {useNavigate, useParams} from 'react-router-dom'
-import type {Listing} from '../../types/types'
-import {getListingById} from '../listingsApi'
+import { useNavigate, useParams } from 'react-router-dom'
+import { FiArrowLeft, FiTrash2 } from 'react-icons/fi'
+import { useListingDetails } from '../hooks/useListingDetails'
+import { useDeleteListing } from '../hooks/useDeleteListing'
 import SimilarListings from '../components/SimilarListings'
+import ListingImage from '../components/ListingImage'
+import ListingInfo from '../components/ListingInfo'
+import ListingDetailsSkeleton from '../../../components/loading/ListingDetailsSkeleton'
+import NotFoundState from '../../../components/error/NotFoundState'
+import ErrorState from '../../../components/error/ErrorState'
+import ConfirmDialog from '../../../components/dialog/DeleteListingDialog'
 
-const ListingDetails = () => {
-  const {id} = useParams()
+ export default function ListingDetails() {
+  const { id } = useParams()
   const navigate = useNavigate()
+  const { listing, loading, error } = useListingDetails(id)
+  const {
+    confirmOpen,
+    openConfirm,
+    closeConfirm,
+    confirmDelete,
+    deleting,
+    error: deleteError,
+  } = useDeleteListing()
 
-  const [listing, setListing] = useState<Listing | null>(null)
-
-  const [loading, setLoading] = useState(true)
-
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    const fetchListing = async () => {
-      try {
-        setLoading(true)
-
-        const data = await getListingById(Number(id))
-
-        setListing(data)
-      } catch (error) {
-        setError(
-          error instanceof Error ? error.message : 'Failed to fetch listing',
-        )
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchListing()
-  }, [id])
-
-  const imageUrl = listing ? `${import.meta.env.VITE_BACKEND_URL}/public${listing.image_url}` : ''
-
+  const imageUrl = listing
+    ? `${import.meta.env.VITE_BACKEND_URL}/public${listing.image_url}`
+    : ''
 
   if (loading) {
-    return <div className="mx-auto max-w-7xl px-4 py-8">Loading listing...</div>
+    return <ListingDetailsSkeleton />
   }
 
   if (error || !listing) {
-    return (
-      <div className="mx-auto max-w-7xl px-4 py-8">
-        <p className="text-red-500">{error || 'Listing not found'}</p>
-
-        <button
-          onClick={() => navigate('/')}
-          className="mt-4 rounded-lg bg-black px-5 py-2 text-white"
-        >
-          Back to listings
-        </button>
-      </div>
-    )
+    return <NotFoundState message={error || 'Listing not found'} />
   }
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
-      {/* Back */}
-      <button
-        onClick={() => navigate(-1)}
-        className="mb-6 text-sm text-gray-600 hover:text-black"
-      >
-        ← Back
-      </button>
+      <div className="mb-6 flex items-center justify-between">
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-1.5 text-sm font-medium text-gray-600 transition hover:text-black"
+        >
+          <FiArrowLeft size={16} />
+          Back
+        </button>
 
-      {/* Details */}
-      <div className="grid grid-cols-1 gap-10 md:grid-cols-2">
-        {/* Image */}
-        <div>
-          {imageUrl && (
-            <img
-              src={imageUrl}
-              alt={listing.title}
-              className="h-[500px] w-full rounded-xl object-cover"
-            />
-          )}
-        </div>
-
-        {/* Information */}
-        <div>
-          <p className="mb-2 text-sm text-gray-500">{listing.category}</p>
-
-          <h1 className="text-4xl font-bold">{listing.title}</h1>
-
-          <p className="mt-6 text-3xl font-bold">${listing.price}</p>
-
-          <div className="mt-6">
-            <p className="text-sm text-gray-500">Condition</p>
-
-            <p className="mt-1 font-medium">{listing.condition}</p>
-          </div>
-
-          <div className="mt-8">
-            <h2 className="text-xl font-semibold">Description</h2>
-
-            <p className="mt-3 leading-7 text-gray-600">
-              {listing.description}
-            </p>
-          </div>
-
-          <p className="mt-8 text-sm text-gray-500">
-            Listed on {new Date(listing.created_at).toLocaleDateString()}
-          </p>
-        </div>
+        <button
+          type="button"
+          onClick={openConfirm}
+          className="flex items-center gap-1.5 rounded-lg border border-red-500 px-4 py-2 text-sm font-medium text-red-500 transition hover:bg-red-500 hover:text-white"
+        >
+          <FiTrash2 size={16} />
+          Delete listing
+        </button>
       </div>
 
-      {/* Similar listings */}
-      <SimilarListings
-        category={listing.category}
-        currentListingId={listing.id}
+      {deleteError && (
+        <div className="mb-6">
+          <ErrorState message={deleteError} />
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 gap-10 md:grid-cols-2">
+        <ListingImage
+          imageUrl={imageUrl}
+          alt={listing.title}
+          heightClassName="h-[500px]"
+        />
+
+        <ListingInfo listing={listing} />
+      </div>
+
+      <SimilarListings category={listing.category} currentListingId={listing.id} />
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Delete this listing?"
+        message="This action can't be undone. The listing will be permanently removed."
+        confirmLabel="Delete"
+        loading={deleting}
+        onConfirm={() => confirmDelete(listing.id)}
+        onCancel={closeConfirm}
       />
     </div>
   )
 }
-
-export default ListingDetails

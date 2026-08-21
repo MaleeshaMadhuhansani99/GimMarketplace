@@ -6,8 +6,11 @@ import cors from "cors";
 import path from "path";
 
 import listingRoutes from "./features/listings/listings.routes";
+import { requestLogger } from "./middleware/requestLogger";
 
 const app = express();
+
+app.use(requestLogger);
 
 app.use(
   cors({

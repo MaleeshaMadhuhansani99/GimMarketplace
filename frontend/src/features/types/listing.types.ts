@@ -9,6 +9,10 @@ export interface Listing {
   created_at: string
 }
 
+export interface ListingCardProps {
+  listing: Listing
+}
+
 export interface PaginationProps {
   page: number
   limit: number
@@ -43,3 +47,18 @@ export interface ListingFilters {
   minPrice: number | ''
   maxPrice: number | ''
 }
+
+export const CATEGORIES: Category[] = [
+  'Mobile Phones',
+  'Laptops',
+  'Furniture',
+  'Kitchen items',
+  'Sports',
+  'Books',
+  'Gaming',
+  'Clothing',
+  'Other',
+]
+
+export const CONDITIONS = ['New', 'Used'] as const
+export type Condition = typeof CONDITIONS[number]

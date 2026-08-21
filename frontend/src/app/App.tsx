@@ -1,19 +1,14 @@
-import {Route, Routes} from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import Layout from '../components/layout/Layout'
-import ListingsPage from '../features/listing/pages/listings'
-import CreateListing from '../features/listing/pages/createListing'
-import ListingDetails from '../features/listing/pages/ListingDetails'
+import { routes } from '../routes/routes'
 
 function App() {
   return (
     <Layout>
       <Routes>
-        <Route path="/" element={<ListingsPage />} />
-        <Route path="/listings/create" element={<CreateListing />} />
-        <Route
-          path="/listings/:id"
-          element={<ListingDetails />}
-        />
+        {routes.map(({ path, element }) => (
+          <Route key={path} path={path} element={element} />
+        ))}
       </Routes>
     </Layout>
   )

@@ -1,4 +1,4 @@
-import type { SortOption } from "@/features/types/types"
+import type { SortOption } from "@/features/types/listing.types"
 
 interface ListingSortProps {
   value: SortOption

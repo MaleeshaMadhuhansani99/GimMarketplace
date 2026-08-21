@@ -1,4 +1,4 @@
-import type {Category, Listing, ListingsResponse} from '../types/types'
+import type {Category, Listing, ListingsResponse} from '../types/listing.types'
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -23,9 +23,7 @@ export const getAllListings = async (
   if (search.trim()) {
     params.append('search', search.trim())
   }
-  const response = await fetch(
-    `${API_URL}/listings?${params.toString()}`,
-  )
+  const response = await fetch(`${API_URL}/listings?${params.toString()}`)
   if (!response.ok) {
     throw new Error('Failed to fetch listings')
   }
@@ -33,9 +31,7 @@ export const getAllListings = async (
   return response.json()
 }
 
-export const createListing = async (
-  formData: FormData,
-) => {
+export const createListing = async (formData: FormData) => {
   const response = await fetch(`${API_URL}/listings/create`, {
     method: 'POST',
     body: formData,
@@ -44,30 +40,32 @@ export const createListing = async (
   const data = await response.json()
 
   if (!response.ok) {
-    throw new Error(
-      data.message ||
-        'Failed to create listing',
-    )
+    throw new Error(data.message || 'Failed to create listing')
   }
 
   return data
 }
 
-export const getListingById = async (
-  id: number,
-): Promise<Listing> => {
-  const response = await fetch(
-    `${API_URL}/listings/${id}`,
-  )
+export const getListingById = async (id: number): Promise<Listing> => {
+  const response = await fetch(`${API_URL}/listings/${id}`)
 
   const data = await response.json()
 
   if (!response.ok) {
-    throw new Error(
-      data.message ||
-        'Failed to fetch listing',
-    )
+    throw new Error(data.message || 'Failed to fetch listing')
   }
 
   return data.data
+}
+
+export async function deleteListing(id: number): Promise<void> {
+  const response = await fetch(`${API_URL}/listings/${id}`, {
+    method: 'DELETE',
+  })
+
+  const data = await response.json().catch(() => null)
+
+  if (!response.ok || !data?.success) {
+    throw new Error(data?.message || 'Failed to delete listing')
+  }
 }

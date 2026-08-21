@@ -3,7 +3,7 @@ import {useAppDispatch, useAppSelector} from '../../../store/hooks'
 import ListingForm from '../components/ListingForm'
 import {createListingThunk} from '../listingsSlice'
 
-const CreateListing = () => {
+export default function CreateListing(){
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
 
@@ -12,8 +12,6 @@ const CreateListing = () => {
   const handleCreateListing = async (formData: FormData) => {
     try {
       await dispatch(createListingThunk(formData)).unwrap()
-
-      // Successfully created
       navigate('/')
     } catch (error) {
       console.error('Failed to create listing:', error)
@@ -24,11 +22,9 @@ const CreateListing = () => {
     <div className="mx-auto max-w-3xl px-4 py-8">
       <h1 className="mb-8 text-3xl font-bold">Create Listing</h1>
 
-      {error && <p className="mb-6 text-red-500">{error}</p>}
-
-      <ListingForm onSubmit={handleCreateListing} loading={loading} />
+      <ListingForm onSubmit={handleCreateListing} loading={loading} error={error} />
     </div>
   )
 }
 
-export default CreateListing
+

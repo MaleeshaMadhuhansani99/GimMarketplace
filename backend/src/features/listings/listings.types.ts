@@ -1,7 +1,7 @@
 export type SortOption = 'newest' | 'oldest' | 'price_asc' | 'price_desc'
 
 export type Category =
-  | 'Mobile phones'
+  | 'Mobile Phones'
   | 'Laptops'
   | 'Furniture'
   | 'Kitchen items'
@@ -11,12 +11,15 @@ export type Category =
   | 'Clothing'
   | 'Other'
 
+export type Condition = 'New' | 'Used'
+
 export interface Listing {
   id: number
   title: string
   description: string
+  condition: Condition
   price: number
   category: Category
-  image: string | null
+  image_url: string | null
   created_at: string
 }

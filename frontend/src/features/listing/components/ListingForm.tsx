@@ -1,228 +1,187 @@
 import { useState } from 'react'
-import type { Category } from '../../types/types'
+import type { Category, Condition } from '../../types/listing.types'
+import { CONDITIONS } from '../../types/listing.types'
+import { validateListingForm, type ListingFormErrors } from '../utils/validateListingForm'
+import NumericInput from '../../../components/form/NumericInput'
+import CategorySelect from './CategorySelect'
+import ImageUploadField from './ImageUploadField'
+import ErrorState from '../../../components/error/ErrorState'
+import FieldError from '../../../components/error/FieldError'
 
 interface ListingFormProps {
   onSubmit: (formData: FormData) => void
   loading?: boolean
+  error?: string | null
 }
 
-const categories: Category[] = [
-  'Mobile Phones',
-  'Laptops',
-  'Furniture',
-  'Kitchen items',
-  'Kitchen items',
-   'Sports',
-   'Books',
-   'Gaming',
-   'Clothing',
-   'Other'
-]
-
-const ListingForm = ({
-  onSubmit,
-  loading = false,
-}: ListingFormProps) => {
+const ListingForm = ({ onSubmit, loading = false, error = null }: ListingFormProps) => {
   const [title, setTitle] = useState('')
-  const [description, setDescription] =
-    useState('')
-const [condition, setCondition] =
-    useState('')
-  const [price, setPrice] = useState('')
-  const [category, setCategory] =
-    useState<Category | ''>('')
-  const [image, setImage] =
-    useState<File | null>(null)
+  const [description, setDescription] = useState('')
+  const [condition, setCondition] = useState<Condition | ''>('')
+  const [price, setPrice] = useState<number | ''>('')
+  const [category, setCategory] = useState<Category | ''>('')
+  const [image, setImage] = useState<File | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<ListingFormErrors>({})
 
-  const handleSubmit = (
-    e: React.FormEvent<HTMLFormElement>,
-  ) => {
+  const clearFieldError = (field: keyof ListingFormErrors) => {
+    setFieldErrors((prev) => {
+      if (!prev[field]) return prev
+      const next = { ...prev }
+      delete next[field]
+      return next
+    })
+  }
+
+  const handleTitleChange = (value: string) => {
+    setTitle(value)
+    clearFieldError('title')
+  }
+
+  const handleDescriptionChange = (value: string) => {
+    setDescription(value)
+    clearFieldError('description')
+  }
+
+  const handleConditionChange = (value: Condition) => {
+    setCondition(value)
+    clearFieldError('condition')
+  }
+
+  const handlePriceChange = (value: number | '') => {
+    setPrice(value)
+    clearFieldError('price')
+  }
+
+  const handleCategoryChange = (value: Category | '') => {
+    setCategory(value)
+    clearFieldError('category')
+  }
+
+  const handleImageChange = (file: File | null) => {
+    setImage(file)
+    clearFieldError('image')
+  }
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
-    if (!image) {
+    const errors = validateListingForm({
+      title,
+      description,
+      condition,
+      price,
+      category,
+      image,
+    })
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors)
       return
     }
 
-    const formData = new FormData()
+    setFieldErrors({})
 
-    formData.append('title', title)
-    formData.append(
-      'description',
-      description,
-    )
+    const formData = new FormData()
+    formData.append('title', title.trim())
+    formData.append('description', description.trim())
     formData.append('condition', condition)
-    formData.append('price', price)
+    formData.append('price', String(price))
     formData.append('category', category)
-    formData.append('image', image)
+    formData.append('image', image as File)
 
     onSubmit(formData)
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="space-y-6"
-    >
+    <form onSubmit={handleSubmit} noValidate className="space-y-6">
+      {error && <ErrorState message={error} />}
+
       {/* Title */}
       <div>
-        <label
-          htmlFor="title"
-          className="mb-2 block font-medium"
-        >
+        <label htmlFor="title" className="mb-2 block font-medium">
           Title
         </label>
-
         <input
           id="title"
           type="text"
           value={title}
-          onChange={(e) =>
-            setTitle(e.target.value)
-          }
+          onChange={(e) => handleTitleChange(e.target.value)}
           placeholder="Enter listing title"
-          required
-          className="w-full rounded-lg border border-gray-300 px-4 py-2 outline-none focus:ring-2"
+          className={`w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 ${
+            fieldErrors.title ? 'border-red-400' : 'border-gray-300'
+          }`}
         />
+        <FieldError message={fieldErrors.title} />
       </div>
 
       {/* Description */}
       <div>
-        <label
-          htmlFor="description"
-          className="mb-2 block font-medium"
-        >
-          Description
+        <label htmlFor="description" className="mb-2 block font-medium">
+          Description (Specifications)
         </label>
-
         <textarea
           id="description"
           value={description}
-          onChange={(e) =>
-            setDescription(e.target.value)
-          }
+          onChange={(e) => handleDescriptionChange(e.target.value)}
           placeholder="Describe your item"
           rows={5}
-          required
-          className="w-full rounded-lg border border-gray-300 px-4 py-2 outline-none focus:ring-2"
+          className={`w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 ${
+            fieldErrors.description ? 'border-red-400' : 'border-gray-300'
+          }`}
         />
+        <FieldError message={fieldErrors.description} />
       </div>
 
- <div>
-        <label
-          htmlFor="condition"
-          className="mb-2 block font-medium"
-        >
+      {/* Condition */}
+      <div>
+        <label htmlFor="condition" className="mb-2 block font-medium">
           Condition
         </label>
-
-        <input
+        <select
           id="condition"
           value={condition}
-          onChange={(e) =>
-            setCondition(e.target.value)
-          }
-          placeholder="Enter Condition"
-          required
-          className="w-full rounded-lg border border-gray-300 px-4 py-2 outline-none focus:ring-2"
-        />
-      </div>
-      {/* Price */}
-      <div>
-        <label
-          htmlFor="price"
-          className="mb-2 block font-medium"
+          onChange={(e) => handleConditionChange(e.target.value as Condition)}
+          className={`w-full rounded-lg border px-4 py-2 ${
+            fieldErrors.condition ? 'border-red-400' : 'border-gray-300'
+          }`}
         >
-          Price
-        </label>
-
-        <input
-          id="price"
-          type="number"
-          min="0"
-          value={price}
-          onChange={(e) =>
-            setPrice(e.target.value)
-          }
-          placeholder="Enter price in dollars($)"
-          required
-          className="w-full rounded-lg border border-gray-300 px-4 py-2 outline-none focus:ring-2"
-        />
-      </div>
-
-      {/* Category */}
-      <div>
-        <label
-          htmlFor="category"
-          className="mb-2 block font-medium"
-        >
-          Category
-        </label>
-
-        <select
-          id="category"
-          value={category}
-          onChange={(e) =>
-            setCategory(
-              e.target.value as Category,
-            )
-          }
-          required
-          className="w-full rounded-lg border border-gray-300 px-4 py-2"
-        >
-          <option value="">
-            Select category
-          </option>
-
-          {categories.map((item) => (
-            <option
-              key={item}
-              value={item}
-            >
+          <option value="">Select condition</option>
+          {CONDITIONS.map((item) => (
+            <option key={item} value={item}>
               {item}
             </option>
           ))}
         </select>
+        <FieldError message={fieldErrors.condition} />
+      </div>
+
+      {/* Price */}
+      <div>
+        <NumericInput
+          label="Price"
+          value={price}
+          onChange={handlePriceChange}
+          placeholder="Enter price in LKR (Rs.)"
+        />
+        <FieldError message={fieldErrors.price} />
+      </div>
+
+      {/* Category */}
+      <div>
+        <CategorySelect value={category} onChange={handleCategoryChange} />
+        <FieldError message={fieldErrors.category} />
       </div>
 
       {/* Image */}
-      <div>
-        <label
-          htmlFor="image"
-          className="mb-2 block font-medium"
-        >
-          Image
-        </label>
-
-        <input
-          id="image"
-          type="file"
-          accept="image/*"
-          required
-          onChange={(e) => {
-            const file =
-              e.target.files?.[0] ?? null
-
-            setImage(file)
-          }}
-          className="w-full rounded-lg border border-gray-300 px-4 py-2"
-        />
-
-        {image && (
-          <p className="mt-2 text-sm text-gray-500">
-            Selected: {image.name}
-          </p>
-        )}
-      </div>
+      <ImageUploadField onChange={handleImageChange} error={fieldErrors.image} />
 
       {/* Submit */}
       <button
         type="submit"
         disabled={loading}
-        className="w-full rounded-lg bg-black px-5 py-3 text-white disabled:opacity-50"
+        className="w-full rounded-lg bg-black px-5 py-3 font-medium text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {loading
-          ? 'Creating listing...'
-          : 'Create Listing'}
+        {loading ? 'Creating listing...' : 'Create Listing'}
       </button>
     </form>
   )

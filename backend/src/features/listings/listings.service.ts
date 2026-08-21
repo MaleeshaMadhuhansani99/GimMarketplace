@@ -1,15 +1,7 @@
 import { db } from '../../config/database'
-import {
-  Category,
-  Listing,
-  SortOption,
-} from './listings.types'
+import { Category, Condition, Listing, SortOption } from './listings.types'
 
 export class ListingsService {
-  // ==========================================
-  // GET ALL LISTINGS
-  // ==========================================
-
   getAllListings(
     page: number,
     limit: number,
@@ -19,13 +11,11 @@ export class ListingsService {
     minPrice: number | '' = '',
     maxPrice: number | '' = '',
   ) {
-    const offset =
-      (page - 1) * limit
+    const offset = (page - 1) * limit
 
     const conditions: string[] = []
     const params: unknown[] = []
 
-    // Search
     if (search.trim()) {
       conditions.push(`
         (
@@ -34,64 +24,37 @@ export class ListingsService {
         )
       `)
 
-      const searchValue =
-        `%${search.trim()}%`
-
-      params.push(
-        searchValue,
-        searchValue,
-      )
+      const searchValue = `%${search.trim()}%`
+      params.push(searchValue, searchValue)
     }
 
-    // Category
     if (category) {
-      conditions.push(
-        'category = ?',
-      )
-
+      conditions.push('category = ?')
       params.push(category)
     }
 
-    // Minimum price
     if (minPrice !== '') {
-      conditions.push(
-        'price >= ?',
-      )
-
+      conditions.push('price >= ?')
       params.push(minPrice)
     }
 
-    // Maximum price
     if (maxPrice !== '') {
-      conditions.push(
-        'price <= ?',
-      )
-
+      conditions.push('price <= ?')
       params.push(maxPrice)
     }
 
-    // WHERE clause
     const whereClause =
-      conditions.length > 0
-        ? `WHERE ${conditions.join(' AND ')}`
-        : ''
+      conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : ''
 
-    // Sort mapping
-    const sortMap: Record<
-      SortOption,
-      string
-    > = {
+    const sortMap: Record<SortOption, string> = {
       newest: 'created_at DESC',
       oldest: 'created_at ASC',
       price_asc: 'price ASC',
       price_desc: 'price DESC',
     }
 
-    const orderBy =
-      sortMap[sort] ??
-      sortMap.newest
+    const orderBy = sortMap[sort] ?? sortMap.newest
 
-    // Get listings
     const listings = db
       .prepare(`
         SELECT *
@@ -100,31 +63,20 @@ export class ListingsService {
         ORDER BY ${orderBy}
         LIMIT ? OFFSET ?
       `)
-      .all(
-        ...params,
-        limit,
-        offset,
-      )
+      .all(...params, limit, offset) as Listing[]
 
-    // Get total count
     const total = db
       .prepare(`
         SELECT COUNT(*) as count
         FROM listings
         ${whereClause}
       `)
-      .get(
-        ...params,
-      ) as { count: number }
+      .get(...params) as { count: number }
 
-    const totalPages =
-      Math.ceil(
-        total.count / limit,
-      )
+    const totalPages = Math.ceil(total.count / limit)
 
     return {
       data: listings,
-
       pagination: {
         page,
         limit,
@@ -134,13 +86,7 @@ export class ListingsService {
     }
   }
 
-  // ==========================================
-  // GET LISTING BY ID
-  // ==========================================
-
-  getListingById(
-    id: number,
-  ): Listing | undefined {
+  getListingById(id: number): Listing | undefined {
     return db
       .prepare(`
         SELECT *
@@ -150,17 +96,13 @@ export class ListingsService {
       .get(id) as Listing | undefined
   }
 
-  // ==========================================
-  // CREATE LISTING
-  // ==========================================
-
   createListing(
     title: string,
     description: string,
-    condition: string,
+    condition: Condition,
     price: number,
     category: Category,
-    imageUrl: string
+    imageUrl: string,
   ) {
     const result = db
       .prepare(`
@@ -174,38 +116,33 @@ export class ListingsService {
         )
         VALUES (?, ?, ?, ?, ?, ?)
       `)
-      .run(
-        title,
-        description,
-        condition,
-        price,
-        category,
-        imageUrl,
-      )
+      .run(title, description, condition, price, category, imageUrl)
 
-    const listingId =
-      Number(result.lastInsertRowid)
+    const listingId = Number(result.lastInsertRowid)
 
-    return this.getListingById(
-      listingId,
-    )
+    return this.getListingById(listingId)
   }
 
-  // ==========================================
-  // UPDATE LISTING IMAGE
-  // ==========================================
-
-  updateListingImage(
-    id: number,
-    imageUrl: string,
-  ) {
+  updateListingImage(id: number, imageUrl: string) {
     db.prepare(`
       UPDATE listings
       SET image_url = ?
       WHERE id = ?
-    `).run(
-      imageUrl,
-      id,
-    )
+    `).run(imageUrl, id)
+  }
+
+  deleteListing(id: number): Listing | undefined {
+    const listing = this.getListingById(id)
+
+    if (!listing) {
+      return undefined
+    }
+
+    db.prepare(`
+      DELETE FROM listings
+      WHERE id = ?
+    `).run(id)
+
+    return listing
   }
 }

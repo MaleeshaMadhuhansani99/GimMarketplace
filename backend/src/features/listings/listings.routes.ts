@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
     createListing,
+  deleteListing,
   getAllListings,
   getListingById,
 } from "./listings.controller";
@@ -19,6 +20,7 @@ router.post(
   upload.single('image'),
   createListing,
 )
+router.delete("/:id", deleteListing);
 
 
 
