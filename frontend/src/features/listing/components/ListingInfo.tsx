@@ -1,3 +1,4 @@
+import { formatPrice } from '../../../utils/formatPrice'
 import type { Listing } from '../../types/listing.types'
 
 interface ListingInfoProps {
@@ -11,7 +12,7 @@ export default function ListingInfo({ listing }: ListingInfoProps) {
 
       <h1 className="text-4xl font-bold">{listing.title}</h1>
 
-      <p className="mt-6 text-3xl font-bold">${listing.price}</p>
+      <p className="mt-6 text-3xl font-bold">{formatPrice(listing.price)}</p>
 
       <div className="mt-6">
         <p className="text-sm text-gray-500">Condition</p>

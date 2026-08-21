@@ -50,7 +50,7 @@ import ConfirmDialog from '../../../components/dialog/DeleteListingDialog'
         <button
           type="button"
           onClick={openConfirm}
-          className="flex items-center gap-1.5 rounded-lg border border-red-500 px-4 py-2 text-sm font-medium text-red-500 transition hover:bg-red-500 hover:text-white"
+          className="flex items-center gap-1.5 rounded-lg border border-red-500 px-4 py-2 text-sm font-medium text-red-500 transition hover:bg-red-500 hover:text-white cursor-pointer"
         >
           <FiTrash2 size={16} />
           Delete listing

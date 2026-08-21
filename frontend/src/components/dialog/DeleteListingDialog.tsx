@@ -32,7 +32,7 @@ export default function ConfirmDialog({
             type="button"
             onClick={onCancel}
             disabled={loading}
-            className="rounded-lg border border-gray-300 px-4 py-2 text-sm disabled:opacity-50"
+            className="rounded-lg border border-gray-300 px-4 py-2 text-sm disabled:opacity-50 cursor-pointer"
           >
             {cancelLabel}
           </button>
@@ -40,7 +40,7 @@ export default function ConfirmDialog({
             type="button"
             onClick={onConfirm}
             disabled={loading}
-            className="rounded-lg bg-red-600 px-4 py-2 text-sm text-white disabled:opacity-50"
+            className="rounded-lg bg-red-600 px-4 py-2 text-sm text-white disabled:opacity-50 cursor-pointer"
           >
             {loading ? 'Deleting...' : confirmLabel}
           </button>
