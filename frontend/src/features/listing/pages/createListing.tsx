@@ -1,9 +1,9 @@
-import { useNavigate } from 'react-router-dom'
+import {useNavigate} from 'react-router-dom'
 import {useAppDispatch, useAppSelector} from '../../../store/hooks'
 import ListingForm from '../components/ListingForm'
 import {createListingThunk} from '../listingsSlice'
 
-export default function CreateListing(){
+export default function CreateListing() {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
 
@@ -11,8 +11,10 @@ export default function CreateListing(){
 
   const handleCreateListing = async (formData: FormData) => {
     try {
-      await dispatch(createListingThunk(formData)).unwrap()
-      navigate('/')
+      const createdListing = await dispatch(
+        createListingThunk(formData),
+      ).unwrap()
+      navigate(`/listings/${createdListing.id}`)
     } catch (error) {
       console.error('Failed to create listing:', error)
     }
@@ -22,9 +24,11 @@ export default function CreateListing(){
     <div className="mx-auto max-w-3xl px-4 py-8">
       <h1 className="mb-8 text-3xl font-bold">Add your product details</h1>
 
-      <ListingForm onSubmit={handleCreateListing} loading={loading} error={error} />
+      <ListingForm
+        onSubmit={handleCreateListing}
+        loading={loading}
+        error={error}
+      />
     </div>
   )
 }
-
-

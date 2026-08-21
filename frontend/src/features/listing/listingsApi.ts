@@ -37,13 +37,13 @@ export const createListing = async (formData: FormData) => {
     body: formData,
   })
 
-  const data = await response.json()
+  const result = await response.json()
 
   if (!response.ok) {
-    throw new Error(data.message || 'Failed to create listing')
+    throw new Error(result.message || 'Failed to create listing')
   }
 
-  return data
+  return result.data
 }
 
 export const getListingById = async (id: number): Promise<Listing> => {
