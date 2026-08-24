@@ -1,4 +1,5 @@
 import { db } from "../config/database";
+import bcrypt from "bcrypt";
 
 const listings = [
   // Mobile Phones
@@ -290,8 +291,22 @@ const listings = [
   },
 ];
 
+const insertUser = db.prepare(`
+  INSERT INTO users (
+    name,
+    email,
+    password
+  )
+  VALUES (
+    @name,
+    @email,
+    @password
+  )
+`);
+
 const insertListing = db.prepare(`
   INSERT INTO listings (
+    user_id,
     title,
     category,
     price,
@@ -300,6 +315,7 @@ const insertListing = db.prepare(`
     image_url
   )
   VALUES (
+    @user_id,
     @title,
     @category,
     @price,
@@ -310,11 +326,44 @@ const insertListing = db.prepare(`
 `);
 
 const seed = db.transaction(() => {
-  for (const listing of listings) {
-    insertListing.run(listing);
-  }
+  // Clear existing seed data
+  db.prepare("DELETE FROM listings").run();
+  db.prepare("DELETE FROM users").run();
+
+  // Hash password for development users
+  const passwordHash = bcrypt.hashSync("Password123", 10);
+
+  // Create development users
+  const user1 = insertUser.run({
+    name: "Maleesha",
+    email: "maleesha@example.com",
+    password: passwordHash,
+  });
+
+  const user2 = insertUser.run({
+    name: "Test User",
+    email: "test@example.com",
+    password: passwordHash,
+  });
+
+  const maleeshaUserId = Number(user1.lastInsertRowid);
+  const testUserId = Number(user2.lastInsertRowid);
+
+  // Create listings and assign an owner
+  listings.forEach((listing, index) => {
+    const userId = index % 2 === 0
+      ? maleeshaUserId
+      : testUserId;
+
+    insertListing.run({
+      user_id: userId,
+      ...listing,
+    });
+  });
 });
 
 seed();
 
-console.log(`${listings.length} listings seeded successfully.`);
+console.log(
+  `${listings.length} listings seeded successfully with 2 users.`
+);
