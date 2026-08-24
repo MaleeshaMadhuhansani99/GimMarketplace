@@ -115,7 +115,10 @@ Create a `.env` file in the `backend` directory (adjust as needed):
 ```env
 DATABASE_URL="file:./dev.db"
 PORT=3000
+JWT_SECRET= KEY
 ```
+
+Generate the JWT key runing this in backend terminal : node -e "console.log(require('crypto').randomBytes(32).toString('hex'))
 
 ### Running the Application
 

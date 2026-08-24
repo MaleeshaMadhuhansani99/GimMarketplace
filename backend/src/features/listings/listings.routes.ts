@@ -6,6 +6,7 @@ import {
   getListingById,
 } from "./listings.controller";
 import multer from "multer";
+import { authenticate } from "../../middleware/auth";
 
 const router = Router();
 
@@ -17,6 +18,7 @@ router.get("/", getAllListings);
 router.get("/:id", getListingById);
 router.post(
   '/create',
+  authenticate,
   upload.single('image'),
   createListing,
 )

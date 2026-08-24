@@ -4,9 +4,11 @@ import "./database/tables";
 import express from "express";
 import cors from "cors";
 import path from "path";
+import 'dotenv/config'
 
 import listingRoutes from "./features/listings/listings.routes";
 import { requestLogger } from "./middleware/requestLogger";
+import authRoutes from "./features/auth/auth.routes";
 
 const app = express();
 
@@ -32,6 +34,7 @@ app.use(
   express.static(path.join(process.cwd(), "public"))
 );
 
+app.use('/api/auth', authRoutes)
 app.use("/api/listings", listingRoutes);
 
 const PORT = process.env.PORT || 3000;
