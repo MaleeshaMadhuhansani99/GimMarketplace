@@ -11,7 +11,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const location = useLocation()
 
   if (initializing) {
-    return null // App-level loading screen already handles this
+    return null 
   }
 
   if (!isAuthenticated) {

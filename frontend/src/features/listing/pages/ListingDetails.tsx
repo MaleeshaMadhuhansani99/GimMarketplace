@@ -25,10 +25,6 @@ export default function ListingDetails() {
     error: deleteError,
   } = useDeleteListing()
 
-  const imageUrl = listing
-    ? `${import.meta.env.VITE_BACKEND_URL}/public${listing.image_url}`
-    : ''
-
   if (loading) {
     return <ListingDetailsSkeleton />
   }
@@ -36,8 +32,11 @@ export default function ListingDetails() {
   if (error || !listing) {
     return <NotFoundState message={error || 'Listing not found'} />
   }
- const isAuthenticated = user?.id === listing.user_id
- 
+
+  const imageUrl = `${import.meta.env.VITE_BACKEND_URL}/public${listing.image_url}`
+
+  const isAuthenticated = user?.id === listing.user_id
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
       <div className="mb-6 flex items-center justify-between">

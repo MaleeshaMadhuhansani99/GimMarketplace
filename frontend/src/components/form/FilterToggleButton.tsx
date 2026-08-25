@@ -1,4 +1,3 @@
-// components/form/FilterToggleButton.tsx
 import { FiSliders } from 'react-icons/fi'
 
 interface FilterToggleButtonProps {
