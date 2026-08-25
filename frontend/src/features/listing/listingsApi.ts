@@ -34,10 +34,15 @@ export const getAllListings = async (
 export const createListing = async (formData: FormData) => {
   const response = await fetch(`${API_URL}/listings/create`, {
     method: 'POST',
+    credentials: 'include',
     body: formData,
   })
 
   const result = await response.json()
+
+  if (response.status === 401) {
+    throw new Error('Your session has expired. Please log in again.')
+  }
 
   if (!response.ok) {
     throw new Error(result.message || 'Failed to create listing')
@@ -61,9 +66,14 @@ export const getListingById = async (id: number): Promise<Listing> => {
 export async function deleteListing(id: number): Promise<void> {
   const response = await fetch(`${API_URL}/listings/${id}`, {
     method: 'DELETE',
+    credentials: 'include',
   })
 
   const data = await response.json().catch(() => null)
+
+  if (response.status === 401) {
+    throw new Error('Your session has expired. Please log in again.')
+  }
 
   if (!response.ok || !data?.success) {
     throw new Error(data?.message || 'Failed to delete listing')

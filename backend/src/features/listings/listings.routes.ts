@@ -7,6 +7,7 @@ import {
 } from "./listings.controller";
 import multer from "multer";
 import { authenticate } from "../../middleware/auth";
+import { getMe } from "../auth/auth.controller";
 
 const router = Router();
 
@@ -22,7 +23,8 @@ router.post(
   upload.single('image'),
   createListing,
 )
-router.delete("/:id", deleteListing);
+router.delete("/:id", authenticate, deleteListing);
+router.get('/me', authenticate, getMe)
 
 
 

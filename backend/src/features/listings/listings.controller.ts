@@ -82,10 +82,32 @@ export const getListingById = (req: Request, res: Response) => {
 export const createListing = (req: Request, res: Response) => {
   try {
     const { title, description, condition, price, category } = req.body
+    const userId = req.user?.userId
     const image = req.file
 
-    if (!title || !description || !condition || !price || !category) {
-      if (image) fs.unlinkSync(image.path)
+    if (!userId) {
+      if (image) {
+        fs.unlinkSync(image.path)
+      }
+
+      return sendError(
+        res,
+        401,
+        'Authentication required',
+      )
+    }
+
+    // Required fields validation
+    if (
+      !title ||
+      !description ||
+      !condition ||
+      !price ||
+      !category
+    ) {
+      if (image) {
+        fs.unlinkSync(image.path)
+      }
 
       return sendError(
         res,
@@ -111,6 +133,7 @@ export const createListing = (req: Request, res: Response) => {
     }
 
     const listing = listingsService.createListing(
+      userId,
       title,
       description,
       condition as Condition,
@@ -162,16 +185,47 @@ export const createListing = (req: Request, res: Response) => {
   }
 }
 
-//deleteListing
 export const deleteListing = (req: Request, res: Response) => {
   try {
+    const userId = req.user?.userId
+
+    if (!userId) {
+      return sendError(
+        res,
+        401,
+        'Authentication required',
+      )
+    }
+
     const id = Number(req.params.id)
 
     if (Number.isNaN(id)) {
       return sendError(res, 400, 'Invalid listing ID')
     }
 
-    const deletedListing = listingsService.deleteListing(id)
+    let deletedListing
+
+    try {
+      deletedListing =
+        listingsService.deleteListing(
+          id,
+          userId,
+        )
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        error.message ===
+          'You are not allowed to delete this listing'
+      ) {
+        return sendError(
+          res,
+          403,
+          'You are not allowed to delete this listing',
+        )
+      }
+
+      throw error
+    }
 
     if (!deletedListing) {
       return sendError(res, 404, 'Listing not found')

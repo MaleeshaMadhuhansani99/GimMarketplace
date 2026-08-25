@@ -20,6 +20,7 @@ export interface Listing {
   condition: Condition
   price: number
   category: Category
+  user_id: number
   image_url: string | null
   created_at: string
 }

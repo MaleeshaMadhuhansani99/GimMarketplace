@@ -4,13 +4,15 @@ A full-stack marketplace application where users can browse, search, filter, cre
 
 ## Features
 
+-  User Registration
+-  User Log in
 -  Browse listings in a responsive grid layout
 -  Global search accessible from any page
 -  Filter listings by category, min price, and max price
 -  Sort listings (newest, oldest, price ascending/descending)
--  Pagination
--  Create new listings with image upload
--  Delete listings with confirmation dialog
+-  Pagination 
+-  Create new listings with image upload by authorized users
+-  Delete listings with confirmation dialog by authorized users
 -  Image preview on upload
 -  Client-side and server-side form validation
 -  Skeleton loading states
@@ -32,50 +34,70 @@ A full-stack marketplace application where users can browse, search, filter, cre
 - **TypeScript**
 - **SQLite** (via `better-sqlite3`) — database
 - **Multer** — image upload handling
+- **JWT** — authentication
+- **cookie-parser** — reading httpOnly auth cookies
+- **bcrypt** — password hashing
 
 ## Project Structure
 
-```
 GimMarketplace/
 ├── frontend/
 │   └── src/
-│       ├── app/                  # App entry, providers, root component
-│       ├── components/           # Shared, reusable UI components
+│       ├── app/                     # App entry, providers, root component
+│       ├── components/              # Shared, reusable UI components
 │       │   ├── badge/
 │       │   ├── dialog/
 │       │   ├── empty-state/
 │       │   ├── error/
-│       │   ├── form/
+│       │   ├── form/                # NumericInput, TextField, FilterActions, FilterToggleButton...
 │       │   ├── loading/
+│       │   ├── navigation/          # MobileMenuButton, UserMenu, AuthLinks
 │       │   ├── pagination/
 │       │   └── search/
 │       ├── features/
+│       │   ├── auth/
+│       │   │   ├── components/      # ProtectedRoute
+│       │   │   ├── pages/           # LoginPage, SignupPage
+│       │   │   ├── types/           # auth.types.ts
+│       │   │   ├── utils/           # validateAuthForm.ts
+│       │   │   ├── authApi.ts
+│       │   │   └── authSlice.ts
 │       │   └── listing/
-│       │       ├── components/   # Listing-specific components
-│       │       ├── hooks/        # Listing-specific hooks
-│       │       ├── pages/        # Route-level pages
-│       │       ├── utils/        # Validation and helpers
+│       │       ├── components/      # Listing-specific components
+│       │       ├── hooks/           # Listing-specific hooks
+│       │       ├── pages/           # Route-level pages
+│       │       ├── utils/           # Validation and helpers
 │       │       ├── listingsApi.ts
 │       │       └── listingsSlice.ts
-│       ├── routes/               # Route definitions
-│       ├── store/                # Redux store configuration
-│       ├── types/                # Global/shared types
-│       └── utils/                # Shared utility functions
+│       ├── routes/                  # Route definitions
+│       ├── store/                   # Redux store configuration
+│       ├── types/                   # Global/shared types
+│       └── utils/                   # Shared utility functions
 │
 └── backend/
     └── src/
         ├── config/
-        │   └── database.ts       # SQLite connection setup
-        ├── listings/
-        │   ├── listings.controller.ts
-        │   ├── listings.service.ts
-        │   ├── listings.routes.ts
-        │   └── listings.types.ts
+        │   ├── database.ts          # SQLite connection setup
+        │   └── env.ts                # Environment variable access (JWT_SECRET, etc.)
+        ├── database/
+        │   └── tables.ts              # Table creation/migrations
+        ├── middleware/
+        │   ├── auth.ts                # JWT authentication middleware
+        │   └── requestLogger.ts
+        ├── features/
+        │   ├── auth/
+        │   │   ├── auth.controller.ts
+        │   │   ├── auth.service.ts
+        │   │   └── auth.routes.ts
+        │   └── listings/
+        │       ├── listings.controller.ts
+        │       ├── listings.service.ts
+        │       ├── listings.routes.ts
+        │       └── listings.types.ts
         ├── utils/
-        │   └── apiResponse.ts    # Consistent API response helpers
+        │   └── apiResponse.ts        # Consistent API response helpers
         └── public/
-            └── images/           # Uploaded listing images
-```
+            └── images/                # Uploaded listing images
 
 ## Getting Started
 
@@ -110,6 +132,7 @@ VITE_BACKEND_URL=http://localhost:3000
 VITE_API_URL=http://localhost:3000/api
 ```
 
+Generate the JWT key runing this in backend terminal : node -e "console.log(require('crypto').randomBytes(32).toString('hex'))
 Create a `.env` file in the `backend` directory (adjust as needed):
 
 ```env
@@ -118,7 +141,7 @@ PORT=3000
 JWT_SECRET= KEY
 ```
 
-Generate the JWT key runing this in backend terminal : node -e "console.log(require('crypto').randomBytes(32).toString('hex'))
+
 
 ### Running the Application
 
@@ -147,6 +170,19 @@ npm run dev
 The frontend will typically be available at `http://localhost:5173`, and the backend API at `http://localhost:3000`.
 
 ## API Endpoints
+
+### Auth
+
+| Method | Endpoint             | Auth required | Description                          |
+|--------|------------------------|:---:|---------------------------------------|
+| POST   | `/api/auth/register`   | No  | Create a new user account            |
+| POST   | `/api/auth/login`      | No  | Log in, sets an httpOnly session cookie |
+| POST   | `/api/auth/logout`     | No  | Clears the session cookie            |
+| GET    | `/api/auth/me`         | Yes | Get the currently authenticated user |
+
+Registration does not automatically log the user in — a valid session cookie is only issued via `/login`.
+
+### Listing
 
 | Method | Endpoint                    | Description                          |
 |--------|------------------------------|---------------------------------------|
@@ -192,7 +228,23 @@ interface Listing {
   image_url: string | null
   created_at: string
 }
+
+interface User {
+  id: number
+  name: string
+  email: string
+}
 ```
+
+## Authentication
+
+- Authentication uses **JWTs stored in httpOnly cookies** — the token is never exposed to frontend JavaScript, reducing XSS risk.
+- On login, the backend sets an `access_token` cookie (`httpOnly`, `secure` in production, `sameSite: 'lax'` in development / `'none'` in production).
+- Every request that needs to identify the current user (creating/deleting listings, fetching the current user) must be sent with `credentials: 'include'` so the browser attaches the cookie.
+- The frontend checks the current session once on app load (`GET /api/auth/me`) and stores the result in Redux (`state.auth`), rather than relying on any client-readable token.
+- Protected frontend routes (e.g. `/listings/create`) are guarded by a `ProtectedRoute` wrapper that redirects unauthenticated users to `/login`.
+- Protected backend routes are guarded by an `authenticate` Express middleware that verifies the JWT and attaches `req.user`.
+
 
 ## Architecture Notes
 

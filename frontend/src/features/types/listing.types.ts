@@ -7,6 +7,7 @@ export interface Listing {
   category: Category
   image_url: string
   created_at: string
+  user_id:number
 }
 
 export interface ListingCardProps {

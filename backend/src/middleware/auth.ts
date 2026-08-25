@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 import jwt from 'jsonwebtoken'
+import {JWT_SECRET} from '../config/env'
 
 import { sendError } from '../utils/apiResponse'
 
@@ -13,21 +14,19 @@ export const authenticate = (
   next: NextFunction,
 ) => {
   try {
-    const authHeader = req.headers.authorization
+    const token = req.cookies.access_token
 
-    if (!authHeader) {
-      return sendError(res, 401, 'Authentication required')
-    }
-
-    const [type, token] = authHeader.split(' ')
-
-    if (type !== 'Bearer' || !token) {
-      return sendError(res, 401, 'Invalid authorization header')
+    if (!token) {
+      return sendError(
+        res,
+        401,
+        'Authentication required',
+      )
     }
 
     const decoded = jwt.verify(
       token,
-      process.env.JWT_SECRET!,
+      JWT_SECRET,
     ) as JwtPayload
 
     req.user = {
@@ -36,8 +35,15 @@ export const authenticate = (
 
     next()
   } catch (error) {
-    console.error('Authentication error:', error)
+    console.error(
+      'Authentication error:',
+      error,
+    )
 
-    return sendError(res, 401, 'Invalid or expired token')
+    return sendError(
+      res,
+      401,
+      'Invalid or expired session',
+    )
   }
 }

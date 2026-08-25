@@ -1,5 +1,10 @@
 import { db } from '../../config/database'
-import { Category, Condition, Listing, SortOption } from './listings.types'
+import {
+  Category,
+  Condition,
+  Listing,
+  SortOption,
+} from './listings.types'
 
 export class ListingsService {
   getAllListings(
@@ -44,7 +49,9 @@ export class ListingsService {
     }
 
     const whereClause =
-      conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : ''
+      conditions.length > 0
+        ? `WHERE ${conditions.join(' AND ')}`
+        : ''
 
     const sortMap: Record<SortOption, string> = {
       newest: 'created_at DESC',
@@ -97,6 +104,7 @@ export class ListingsService {
   }
 
   createListing(
+    userId: number,
     title: string,
     description: string,
     condition: Condition,
@@ -107,6 +115,7 @@ export class ListingsService {
     const result = db
       .prepare(`
         INSERT INTO listings (
+          user_id,
           title,
           description,
           condition,
@@ -114,9 +123,17 @@ export class ListingsService {
           category,
           image_url
         )
-        VALUES (?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
       `)
-      .run(title, description, condition, price, category, imageUrl)
+      .run(
+        userId,
+        title,
+        description,
+        condition,
+        price,
+        category,
+        imageUrl,
+      )
 
     const listingId = Number(result.lastInsertRowid)
 
@@ -131,17 +148,27 @@ export class ListingsService {
     `).run(imageUrl, id)
   }
 
-  deleteListing(id: number): Listing | undefined {
+  deleteListing(
+    id: number,
+    userId: number,
+  ): Listing | undefined {
     const listing = this.getListingById(id)
 
     if (!listing) {
       return undefined
     }
 
+    if (listing.user_id !== userId) {
+      throw new Error(
+        'You are not allowed to delete this listing',
+      )
+    }
+
     db.prepare(`
       DELETE FROM listings
       WHERE id = ?
-    `).run(id)
+      AND user_id = ?
+    `).run(id, userId)
 
     return listing
   }

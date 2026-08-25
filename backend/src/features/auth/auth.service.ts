@@ -2,9 +2,12 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import {db} from '../../config/database'
 import {LoginInput, RegisterInput, User} from './auth.types'
+import {JWT_SECRET} from '../../config/env'
 
 export class AuthService {
   async register({name, email, password}: RegisterInput): Promise<User> {
+    const normalizedEmail = email.trim().toLowerCase()
+
     const existingUser = db
       .prepare(
         `
@@ -13,7 +16,7 @@ export class AuthService {
         WHERE email = ?
       `,
       )
-      .get(email) as {id: number} | undefined
+      .get(normalizedEmail) as {id: number} | undefined
 
     if (existingUser) {
       throw new Error('Email already registered')
@@ -32,7 +35,7 @@ export class AuthService {
         VALUES (?, ?, ?)
       `,
       )
-      .run(name, email, hashedPassword)
+      .run(name, normalizedEmail, hashedPassword)
 
     const userId = Number(result.lastInsertRowid)
 
@@ -89,7 +92,7 @@ export class AuthService {
       {
         userId: user.id,
       },
-      process.env.JWT_SECRET!,
+      JWT_SECRET,
       {
         expiresIn: '1d',
       },
