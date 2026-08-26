@@ -96,8 +96,7 @@ export const createListing = (req: Request, res: Response) => {
         'Authentication required',
       )
     }
-
-    // Required fields validation
+    
     if (
       !title ||
       !description ||
