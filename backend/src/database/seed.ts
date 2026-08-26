@@ -326,14 +326,11 @@ const insertListing = db.prepare(`
 `);
 
 const seed = db.transaction(() => {
-  // Clear existing seed data
   db.prepare("DELETE FROM listings").run();
   db.prepare("DELETE FROM users").run();
 
-  // Hash password for development users
   const passwordHash = bcrypt.hashSync("Password123", 10);
 
-  // Create development users
   const user1 = insertUser.run({
     name: "Maleesha",
     email: "maleesha@example.com",
@@ -349,7 +346,6 @@ const seed = db.transaction(() => {
   const maleeshaUserId = Number(user1.lastInsertRowid);
   const testUserId = Number(user2.lastInsertRowid);
 
-  // Create listings and assign an owner
   listings.forEach((listing, index) => {
     const userId = index % 2 === 0
       ? maleeshaUserId
